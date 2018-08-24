@@ -57,7 +57,25 @@ public class TransactionSummary
 		  .collect(Collectors.groupingBy(tranx -> tranx.getClientType().trim()+"_"+tranx.getClientNumber().trim()+"_"+tranx.getAccountNumber().trim()+"_"+tranx.getSubAccountNumber().trim()
 				  , Collectors.groupingBy(tranx -> tranx.getProductGroupCode().trim()+"_"+tranx.getExchangeCode().trim()+"_"+tranx.getSymbol().trim()+"_"+tranx.getExpirationDate().trim())));
         
-        System.out.println(groupByClientAndProduct);
+        //System.out.println(groupByClientAndProduct);
+        
+        for(String client_Info : groupByClientAndProduct.keySet()) {
+        	Map<String, List<TransactionRecordBean>> productGroup = groupByClientAndProduct.get(client_Info);
+        	for(String product_Info : productGroup.keySet()) {
+        		
+        		List<TransactionRecordBean> tranxPerClientPerGroup = productGroup.get(product_Info);
+        		
+        		double quantityLongSum = tranxPerClientPerGroup.stream()
+        							  .mapToDouble(tranx -> tranx.getQuantityLong())
+        							  .sum();
+        		
+        		double quantityShortSum = tranxPerClientPerGroup.stream()
+						  .mapToDouble(tranx -> tranx.getQuantityShort())
+						  .sum();
+        		
+        		System.out.println(quantityLongSum-quantityShortSum);
+        	}
+        }
         
     }
 
