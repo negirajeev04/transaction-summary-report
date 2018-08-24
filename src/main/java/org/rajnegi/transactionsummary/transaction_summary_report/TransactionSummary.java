@@ -23,92 +23,105 @@ import org.rajnegi.transactionsummary.transaction_summary_report.mapper.FlatReco
  * Hello world!
  *
  */
-public class TransactionSummary 
-{
+public class TransactionSummary {
 	private static final Logger LOGGER = Logger.getLogger(TransactionSummary.class);
-	
-    public static void main( String[] args ) throws IOException
-    {
-    	Properties props = new Properties();
-    	props.load(TransactionSummary.class.getResourceAsStream("/log4j.properties"));
-    	PropertyConfigurator.configure(props);
-        
-        if(args == null || args.length < 1) {
-        	LOGGER.error("Missing the input flat file path. Please mention absolute path for the file as part of the program arguments");
-        	System.exit(1);
-        }
-        
-        File inputFile = new File(args[0]);
-        TransactionSummary summary = new TransactionSummary();
-        FlatRecordMapper mapper = new FlatRecordMapper();
-        List<TransactionRecordBean> listOfTransactions = summary.processInputFile(inputFile, mapper::mapRecord);
-        
-        Map<String, List<TransactionRecordBean>> collectByClient = listOfTransactions.stream()
-        				  .collect(Collectors.groupingBy(tranx -> tranx.getClientType()+"_"+tranx.getClientNumber()+"_"+tranx.getAccountNumber()+"_"+tranx.getSubAccountNumber()));
-        
-        //collectByClient.forEach((client, tranx) -> System.out.printf("Client - %s; tranx : %s\n",client,tranx));
-        
-        Map<String, List<TransactionRecordBean>> collectByProduct = listOfTransactions.stream()
-				  .collect(Collectors.groupingBy(tranx -> tranx.getProductGroupCode()+"_"+tranx.getExchangeCode()+"_"+tranx.getSymbol()+"_"+tranx.getExpirationDate()));
 
-        //collectByProduct.forEach((product, tranx) -> System.out.printf("product - %s; tranx : %s\n",product,tranx));
-        
-        Map<String, Map<String, List<TransactionRecordBean>>> groupByClientAndProduct = listOfTransactions.stream()
-		  .collect(Collectors.groupingBy(tranx -> tranx.getClientType().trim()+"_"+tranx.getClientNumber().trim()+"_"+tranx.getAccountNumber().trim()+"_"+tranx.getSubAccountNumber().trim()
-				  , Collectors.groupingBy(tranx -> tranx.getProductGroupCode().trim()+"_"+tranx.getExchangeCode().trim()+"_"+tranx.getSymbol().trim()+"_"+tranx.getExpirationDate().trim())));
-        
-        //System.out.println(groupByClientAndProduct);
-        
-        for(String client_Info : groupByClientAndProduct.keySet()) {
-        	Map<String, List<TransactionRecordBean>> productGroup = groupByClientAndProduct.get(client_Info);
-        	for(String product_Info : productGroup.keySet()) {
-        		
-        		List<TransactionRecordBean> tranxPerClientPerGroup = productGroup.get(product_Info);
-        		
-        		double quantityLongSum = tranxPerClientPerGroup.stream()
-        							  .mapToDouble(tranx -> tranx.getQuantityLong())
-        							  .sum();
-        		
-        		double quantityShortSum = tranxPerClientPerGroup.stream()
-						  .mapToDouble(tranx -> tranx.getQuantityShort())
-						  .sum();
-        		
-        		System.out.println(quantityLongSum-quantityShortSum);
-        	}
-        }
-        
-    }
+	public static void main(String[] args) throws IOException {
+		Properties props = new Properties();
+		props.load(TransactionSummary.class.getResourceAsStream("/log4j.properties"));
+		PropertyConfigurator.configure(props);
 
-    
-    /**
-     * Read the input flat file and map each record to a POJO.
-     * @param inputFile
-     * @param recordMapper
-     * @return
-     */
-	private List<TransactionRecordBean> processInputFile(File inputFile, RecordMapper<TransactionRecordBean> recordMapper) {
+		if (args == null || args.length < 1) {
+			LOGGER.error(
+					"Missing the input flat file path. Please mention absolute path for the file as part of the program arguments");
+			System.exit(1);
+		}
+
+		File inputFile = new File(args[0]);
+		TransactionSummary summary = new TransactionSummary();
+		FlatRecordMapper mapper = new FlatRecordMapper();
+
+		List<TransactionRecordBean> listOfTransactions = summary.processInputFile(inputFile, mapper::mapRecord);
+		summary.generateSummaryReport(listOfTransactions);
+	}
+
+
+	/**
+	 * Read the input flat file and map each record to a POJO.
+	 * 
+	 * @param inputFile
+	 * @param recordMapper
+	 * @return
+	 */
+	private List<TransactionRecordBean> processInputFile(File inputFile,
+			RecordMapper<TransactionRecordBean> recordMapper) {
 
 		List<TransactionRecordBean> transactionRecords = new ArrayList<>();
-		
-		try(BufferedReader br = new BufferedReader(new FileReader(inputFile))){
-			
-			String flatRecord="";
-			while((flatRecord = br.readLine()) != null) {
+
+		try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
+
+			String flatRecord = "";
+			while ((flatRecord = br.readLine()) != null) {
 				Optional<TransactionRecordBean> mapRecord = recordMapper.mapRecord(flatRecord);
-				if(mapRecord.isPresent()) {
+				if (mapRecord.isPresent()) {
 					transactionRecords.add(mapRecord.get());
 				}
 			}
-			
+
 		} catch (FileNotFoundException e) {
-			LOGGER.error("Unable to find the input file - "+e.getMessage());
+			LOGGER.error("Unable to find the input file - " + e.getMessage());
 			System.exit(1);
 		} catch (IOException e) {
-			LOGGER.error("Error while reading the input file - "+e.getMessage());
+			LOGGER.error("Error while reading the input file - " + e.getMessage());
 			System.exit(1);
 		}
-		
+
 		return transactionRecords;
+	}
+	
+	private void generateSummaryReport(List<TransactionRecordBean> listOfTransactions) {
+
+
+		Map<String, List<TransactionRecordBean>> collectByClient = listOfTransactions.stream()
+				.collect(Collectors.groupingBy(tranx -> tranx.getClientType() + "_" + tranx.getClientNumber() + "_"
+						+ tranx.getAccountNumber() + "_" + tranx.getSubAccountNumber()));
+
+		// collectByClient.forEach((client, tranx) -> System.out.printf("Client - %s;
+		// tranx : %s\n",client,tranx));
+
+		Map<String, List<TransactionRecordBean>> collectByProduct = listOfTransactions.stream()
+				.collect(Collectors.groupingBy(tranx -> tranx.getProductGroupCode() + "_" + tranx.getExchangeCode()
+						+ "_" + tranx.getSymbol() + "_" + tranx.getExpirationDate()));
+
+		// collectByProduct.forEach((product, tranx) -> System.out.printf("product - %s;
+		// tranx : %s\n",product,tranx));
+
+		Map<String, Map<String, List<TransactionRecordBean>>> groupByClientAndProduct = listOfTransactions.stream()
+				.collect(Collectors.groupingBy(
+						tranx -> tranx.getClientType().trim() + "_" + tranx.getClientNumber().trim() + "_"
+								+ tranx.getAccountNumber().trim() + "_" + tranx.getSubAccountNumber().trim(),
+						Collectors.groupingBy(
+								tranx -> tranx.getProductGroupCode().trim() + "_" + tranx.getExchangeCode().trim() + "_"
+										+ tranx.getSymbol().trim() + "_" + tranx.getExpirationDate().trim())));
+
+		// System.out.println(groupByClientAndProduct);
+
+		for (String client_Info : groupByClientAndProduct.keySet()) {
+			Map<String, List<TransactionRecordBean>> productGroup = groupByClientAndProduct.get(client_Info);
+			for (String product_Info : productGroup.keySet()) {
+
+				List<TransactionRecordBean> tranxPerClientPerGroup = productGroup.get(product_Info);
+
+				double quantityLongSum = tranxPerClientPerGroup.stream().mapToDouble(tranx -> tranx.getQuantityLong())
+						.sum();
+
+				double quantityShortSum = tranxPerClientPerGroup.stream().mapToDouble(tranx -> tranx.getQuantityShort())
+						.sum();
+
+				System.out.println(quantityLongSum - quantityShortSum);
+			}
+		}
+
 	}
 
 }

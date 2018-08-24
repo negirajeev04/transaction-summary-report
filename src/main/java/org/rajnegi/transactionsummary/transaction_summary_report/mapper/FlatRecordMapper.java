@@ -2,6 +2,7 @@ package org.rajnegi.transactionsummary.transaction_summary_report.mapper;
 
 import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.rajnegi.transactionsummary.transaction_summary_report.TransactionSummary;
 import org.rajnegi.transactionsummary.transaction_summary_report.beans.FieldType;
@@ -22,13 +23,18 @@ public class FlatRecordMapper{
 	 */
 	public Optional<TransactionRecordBean> mapRecord(String record) {
 		
-		/*if(record.length() != 177) {
+		LOGGER.debug("Mapping record for - "+record);
+		
+		/*
+		 *Excluding the trailing fillers, the length of each flat record should be 176 
+		 */
+		if(StringUtils.isEmpty(record) || record.trim().length() != 176) {
 			LOGGER.error("Unable to parse the record - "+record+"; Missing fields!!");
 			LOGGER.error("Moving to the next record");
 			//throw new InvalidRecordException(String.format("Invalid record %s\n",record));
 			return Optional.ofNullable(null);
-		}*/
-		LOGGER.debug("Mapping record for - "+record);
+		}
+		
 		TransactionRecordBean transactionBean = new TransactionRecordBean.TransactionRecordBuilder("315")
 												.clientType(getValue(record, FieldType.CLIENT_TYPE))
 												.clientNumber(getValue(record, FieldType.CLIENT_NUMBER))
