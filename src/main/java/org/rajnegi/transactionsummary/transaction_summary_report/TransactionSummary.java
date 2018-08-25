@@ -1,13 +1,13 @@
 package org.rajnegi.transactionsummary.transaction_summary_report;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.rajnegi.transactionsummary.transaction_summary_report.beans.TransactionRecordBean;
@@ -51,31 +51,20 @@ public class TransactionSummary {
 			LOGGER.debug("Start of processInputFile; inputFile = "+inputFile.getName());
 		}
 		
-		List<TransactionRecordBean> transactionRecords = new ArrayList<>();
-
-		try (BufferedReader br = new BufferedReader(new FileReader(inputFile))) {
-
-			String flatRecord = "";
-			while ((flatRecord = br.readLine()) != null) {
-				Optional<TransactionRecordBean> mapRecord = recordMapper.mapRecord(flatRecord);
-				if (mapRecord.isPresent()) {
-					transactionRecords.add(mapRecord.get());
-				}
-			}
-
-		} catch (FileNotFoundException e) {
-			LOGGER.error("Unable to find the input file - " + e.getMessage());
-			System.exit(1);
+		Path path = Paths.get(inputFile.toURI());
+		try (Stream<String> lineStream = Files.lines(path)){
+			
+			List<TransactionRecordBean> transactionRecords = lineStream.map(record -> recordMapper.mapRecord(record).get())
+					  .collect(Collectors.toList());
+			
+			return transactionRecords;
+			
 		} catch (IOException e) {
 			LOGGER.error("Error while reading the input file - " + e.getMessage());
 			System.exit(1);
 		}
-
-		if(LOGGER.isDebugEnabled()){
-			LOGGER.debug("End of processInputFile; returning transactionRecords = "+transactionRecords);
-		}
 		
-		return transactionRecords;
+		return null;
 	}
 
 }
