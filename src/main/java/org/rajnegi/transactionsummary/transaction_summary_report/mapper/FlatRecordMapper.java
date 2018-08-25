@@ -2,16 +2,14 @@ package org.rajnegi.transactionsummary.transaction_summary_report.mapper;
 
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.rajnegi.transactionsummary.transaction_summary_report.TransactionSummary;
 import org.rajnegi.transactionsummary.transaction_summary_report.beans.FieldType;
 import org.rajnegi.transactionsummary.transaction_summary_report.beans.TransactionRecordBean;
-import org.rajnegi.transactionsummary.transaction_summary_report.exception.InvalidRecordException;
 
 public class FlatRecordMapper{
 
-	private static final Logger LOGGER = Logger.getLogger(TransactionSummary.class);
+	private static final Logger LOGGER = Logger.getLogger(FlatRecordMapper.class);
 	
 	public FlatRecordMapper() {}
 
@@ -23,7 +21,9 @@ public class FlatRecordMapper{
 	 */
 	public Optional<TransactionRecordBean> mapRecord(String record) {
 		
-		LOGGER.debug("Mapping record for - "+record);
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.debug("Start of mapRecord. record = "+record);
+		}
 		
 		/*
 		 *Excluding the trailing fillers, the length of each flat record should be 176 
@@ -71,7 +71,10 @@ public class FlatRecordMapper{
 											    .openCloseCode(getValue(record, FieldType.OPEN_CLOSE_CODE).charAt(0))
 												.build();
 		
-		LOGGER.debug("Mapped TransactionRecordBean - "+transactionBean);
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.debug("End of mapRecord. returning TransactionRecordBean = "+transactionBean);
+		}
+		
 		return Optional.ofNullable(transactionBean);
 	}
 	
