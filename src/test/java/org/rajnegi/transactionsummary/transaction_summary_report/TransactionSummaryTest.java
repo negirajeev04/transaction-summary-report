@@ -90,9 +90,11 @@ public class TransactionSummaryTest {
 		String outputFilePath = inputFile.getParent()+"/output.csv";
 		
 		File csvFile = new File(outputFilePath);
+		csvFile.deleteOnExit();
+		
 		assertTrue(!csvFile.exists());//File should not exists before
 		CSVWriter.generateSummaryReport(listOfTransactions, inputFile.getParent());
-		assertTrue(csvFile.exists());
+		assertTrue(csvFile.exists());// File should be generated
 	}
 	
 }
