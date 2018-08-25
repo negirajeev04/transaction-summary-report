@@ -20,7 +20,7 @@ public class TransactionSummary {
 	
 	private static final Logger LOGGER = Logger.getLogger(TransactionSummary.class);
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		
 		if (args == null || args.length < 1) {
 			LOGGER.error(
@@ -44,7 +44,7 @@ public class TransactionSummary {
 	 * @param recordMapper
 	 * @return
 	 */
-	private List<TransactionRecordBean> processInputFile(File inputFile,
+	public List<TransactionRecordBean> processInputFile(File inputFile,
 			RecordMapper<TransactionRecordBean> recordMapper) {
 
 		if(LOGGER.isDebugEnabled()){
@@ -77,50 +77,5 @@ public class TransactionSummary {
 		
 		return transactionRecords;
 	}
-	
-	/*private void generateSummaryReport(List<TransactionRecordBean> listOfTransactions) {
-
-
-		Map<String, List<TransactionRecordBean>> collectByClient = listOfTransactions.stream()
-				.collect(Collectors.groupingBy(tranx -> tranx.getClientType() + "_" + tranx.getClientNumber() + "_"
-						+ tranx.getAccountNumber() + "_" + tranx.getSubAccountNumber()));
-
-		// collectByClient.forEach((client, tranx) -> System.out.printf("Client - %s;
-		// tranx : %s\n",client,tranx));
-
-		Map<String, List<TransactionRecordBean>> collectByProduct = listOfTransactions.stream()
-				.collect(Collectors.groupingBy(tranx -> tranx.getProductGroupCode() + "_" + tranx.getExchangeCode()
-						+ "_" + tranx.getSymbol() + "_" + tranx.getExpirationDate()));
-
-		// collectByProduct.forEach((product, tranx) -> System.out.printf("product - %s;
-		// tranx : %s\n",product,tranx));
-
-		Map<String, Map<String, List<TransactionRecordBean>>> groupByClientAndProduct = listOfTransactions.stream()
-				.collect(Collectors.groupingBy(
-						tranx -> tranx.getClientType().trim() + "_" + tranx.getClientNumber().trim() + "_"
-								+ tranx.getAccountNumber().trim() + "_" + tranx.getSubAccountNumber().trim(),
-						Collectors.groupingBy(
-								tranx -> tranx.getProductGroupCode().trim() + "_" + tranx.getExchangeCode().trim() + "_"
-										+ tranx.getSymbol().trim() + "_" + tranx.getExpirationDate().trim())));
-
-		// System.out.println(groupByClientAndProduct);
-
-		for (String client_Info : groupByClientAndProduct.keySet()) {
-			Map<String, List<TransactionRecordBean>> productGroup = groupByClientAndProduct.get(client_Info);
-			for (String product_Info : productGroup.keySet()) {
-
-				List<TransactionRecordBean> tranxPerClientPerGroup = productGroup.get(product_Info);
-
-				double quantityLongSum = tranxPerClientPerGroup.stream().mapToDouble(tranx -> tranx.getQuantityLong())
-						.sum();
-
-				double quantityShortSum = tranxPerClientPerGroup.stream().mapToDouble(tranx -> tranx.getQuantityShort())
-						.sum();
-
-				System.out.println(quantityLongSum - quantityShortSum);
-			}
-		}
-
-	}*/
 
 }

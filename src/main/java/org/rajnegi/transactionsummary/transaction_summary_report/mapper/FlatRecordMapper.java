@@ -10,6 +10,7 @@ import org.rajnegi.transactionsummary.transaction_summary_report.beans.Transacti
 public class FlatRecordMapper{
 
 	private static final Logger LOGGER = Logger.getLogger(FlatRecordMapper.class);
+	private static final Integer VALID_FLAT_RECORD_LENGTH = 176;
 	
 	public FlatRecordMapper() {}
 
@@ -28,7 +29,7 @@ public class FlatRecordMapper{
 		/*
 		 *Excluding the trailing fillers, the length of each flat record should be 176 
 		 */
-		if(StringUtils.isEmpty(record) || record.trim().length() != 176) {
+		if(StringUtils.isEmpty(record) || record.trim().length() != VALID_FLAT_RECORD_LENGTH) {
 			LOGGER.error("Unable to parse the record - "+record+"; Missing fields!!");
 			LOGGER.error("Moving to the next record");
 			return Optional.ofNullable(null);
