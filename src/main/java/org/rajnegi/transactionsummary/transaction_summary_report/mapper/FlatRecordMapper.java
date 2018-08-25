@@ -31,7 +31,6 @@ public class FlatRecordMapper{
 		if(StringUtils.isEmpty(record) || record.trim().length() != 176) {
 			LOGGER.error("Unable to parse the record - "+record+"; Missing fields!!");
 			LOGGER.error("Moving to the next record");
-			//throw new InvalidRecordException(String.format("Invalid record %s\n",record));
 			return Optional.ofNullable(null);
 		}
 		
