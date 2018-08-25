@@ -113,7 +113,7 @@ public class FlatRecordMapper {
 	 */
 	private boolean isDateFormatValid(String dateString) {
 
-		if (dateString.length() != 8)
+		if (dateString.length() < 8)
 			return false;
 		
 		try {
